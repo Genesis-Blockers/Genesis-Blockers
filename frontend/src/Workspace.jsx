@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, ZoomIn, ZoomOut, Focus, Check, ShieldAlert } from 'lucide-react';
 import TransactionGraph from './components/TransactionGraph';
-
+import AttributionPanel from './components/AttributionPanel';
 function Workspace() {
     return (
         <div className="h-screen w-full flex flex-col font-sans bg-slate-950 text-slate-200 overflow-hidden">
@@ -83,76 +83,8 @@ function Workspace() {
                         </p>
                     </div>
 
-                    {/* VASP Match Card */}
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-md p-4 flex flex-col space-y-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h3 className="text-sm font-medium text-slate-400">Nearest VASP Match</h3>
-                                <p className="text-2xl font-semibold text-slate-100 mt-1 tracking-tight">Demo VASP</p>
-                            </div>
-                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded shadow-sm">
-                                CRITICAL
-                            </div>
-                        </div>
+                    <AttributionPanel />
 
-                        <div className="flex items-center space-x-4 pt-2">
-                            <div className="flex flex-col">
-                                <span className="text-xs text-slate-500">Confidence</span>
-                                <span className="text-lg font-mono text-emerald-400">91.0%</span>
-                            </div>
-                            <div className="w-px h-8 bg-slate-800"></div>
-                            <div className="flex flex-col">
-                                <span className="text-xs text-slate-500">Graph Distance</span>
-                                <span className="text-lg font-mono text-slate-200">3 Hops</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Evidence List */}
-                    <div className="flex flex-col space-y-3 pt-2">
-                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Attribution Evidence</h4>
-
-                        <div className="space-y-2">
-                            {/* Evidence Item 1 */}
-                            <div className="bg-slate-900 border border-slate-800/80 rounded p-3 flex items-start space-x-3 hover:border-slate-700 transition-colors">
-                                <div className="mt-0.5 bg-emerald-500/20 p-1 rounded-full">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm text-slate-300 leading-snug">Direct transfer of 50.5 ETH to known deposit address.</p>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-xs font-mono text-slate-500">Str: 0.95</span>
-                                </div>
-                            </div>
-
-                            {/* Evidence Item 2 */}
-                            <div className="bg-slate-900 border border-slate-800/80 rounded p-3 flex items-start space-x-3 hover:border-slate-700 transition-colors">
-                                <div className="mt-0.5 bg-emerald-500/20 p-1 rounded-full">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm text-slate-300 leading-snug">Repeated interactions with nested mixer cluster.</p>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-xs font-mono text-slate-500">Str: 0.82</span>
-                                </div>
-                            </div>
-
-                            {/* Evidence Item 3 */}
-                            <div className="bg-slate-900 border border-slate-800/80 rounded p-3 flex items-start space-x-3 hover:border-slate-700 transition-colors">
-                                <div className="mt-0.5 bg-emerald-500/20 p-1 rounded-full">
-                                    <Check className="w-3 h-3 text-emerald-400" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm text-slate-300 leading-snug">Temporal correlation with known phishing campaign.</p>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-xs font-mono text-slate-500">Str: 0.74</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                 </aside>
             </main>
