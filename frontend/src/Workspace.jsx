@@ -79,7 +79,7 @@ function Workspace() {
                             <span className="text-xs font-mono text-slate-500">INV-2026-0001</span>
                         </div>
                         <p className="text-sm text-slate-500 mt-2">
-                            <span className="text-slate-300 font-medium">25</span> Transactions Analyzed
+                            <span className="text-slate-300 font-medium">4</span> Transactions Analyzed
                         </p>
                     </div>
 
