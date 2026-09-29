@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-
+from typing import List
+from app.models.domain import AttributionResult
 
 class InvestigationRequest(BaseModel):
     wallet: str = Field(..., min_length=1)
@@ -13,3 +14,4 @@ class InvestigationResponse(BaseModel):
     chain: str
     status: str
     message: str
+    attributions: List[AttributionResult] = Field(default_factory=list)
