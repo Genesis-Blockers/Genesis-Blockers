@@ -145,7 +145,77 @@ const initialEdges = [
   { id: 'e4', source: 'hop2', target: 'vasp', type: 'transferEdge', animated: true, data: { amount: '12.0 ETH' } }
 ];
 
-export default function TransactionGraph() {
+export default function TransactionGraph({ result }) {
+  const { graphNodes, graphEdges } = useMemo(() => {
+    if (!result || !result.attributions || result.attributions.length === 0) {
+      return { graphNodes: initialNodes, graphEdges: initialEdges };
+    }
+
+    const newNodes = [];
+    const newEdges = [];
+    const nodeMap = new Set();
+    const addedEdges = new Set();
+    
+    // Add suspect node
+    const suspectAddr = result.wallet;
+    newNodes.push({
+      id: suspectAddr,
+      type: 'suspectNode',
+      position: { x: 60, y: 200 },
+      data: { 
+        address: suspectAddr.substring(0,6) + '...' + suspectAddr.substring(suspectAddr.length-4), 
+        fullAddress: suspectAddr, 
+        depth: '0 Hops', 
+        volume: 'Origin' 
+      }
+    });
+    nodeMap.add(suspectAddr);
+
+    result.attributions.forEach((attr, pathIndex) => {
+      let currentX = 60;
+      const baseY = 200 + (pathIndex * 150) - ((result.attributions.length - 1) * 75);
+
+      attr.path.path.forEach((addr, i) => {
+        if (!nodeMap.has(addr)) {
+          currentX += 300;
+          const isVasp = (i === attr.path.path.length - 1);
+          newNodes.push({
+            id: addr,
+            type: isVasp ? 'vaspNode' : 'hopNode',
+            position: { x: currentX, y: baseY },
+            data: { 
+              address: addr.substring(0,6) + '...' + addr.substring(addr.length-4), 
+              fullAddress: addr,
+              hopIndex: i,
+              depth: `${i} Hops`, 
+              volume: isVasp ? `${attr.path.total_value.toFixed(2)} ETH` : 'Intermediary',
+              vaspName: isVasp ? attr.vasp_name : undefined
+            }
+          });
+          nodeMap.add(addr);
+        } else {
+          currentX = newNodes.find(n => n.id === addr).position.x;
+        }
+      });
+
+      attr.path.transactions.forEach((tx) => {
+        if (!addedEdges.has(tx.tx_hash)) {
+          newEdges.push({
+            id: tx.tx_hash,
+            source: tx.from_address,
+            target: tx.to_address,
+            type: 'transferEdge',
+            animated: true,
+            data: { amount: `${tx.value} ${tx.asset}` }
+          });
+          addedEdges.add(tx.tx_hash);
+        }
+      });
+    });
+
+    return { graphNodes: newNodes, graphEdges: newEdges };
+  }, [result]);
+
   const nodeTypes = useMemo(() => ({ suspectNode: SuspectNode, hopNode: HopNode, vaspNode: VaspNode }), []);
   const edgeTypes = useMemo(() => ({ transferEdge: TransferEdge }), []);
 
@@ -156,8 +226,8 @@ export default function TransactionGraph() {
         .react-flow__attribution { display: none !important; }
       `}</style>
       <ReactFlow
-        nodes={initialNodes}
-        edges={initialEdges}
+        nodes={graphNodes}
+        edges={graphEdges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
@@ -169,9 +239,9 @@ export default function TransactionGraph() {
         {/* Canvas Status Telemetry Bar */}
         <Panel position="top-left" className="m-4">
           <div className="bg-slate-950/90 border border-slate-800 backdrop-blur px-3 py-1.5 rounded-md flex items-center gap-2 shadow-lg">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+            <div className={`w-2 h-2 ${result ? 'bg-blue-500' : 'bg-emerald-500'} rounded-full animate-pulse`} />
             <div className="text-[11px] font-mono text-slate-400">
-              SYS // ACTIVE GRAPH: 4 NODES · 4 EDGES · MAX DEPTH: 3 HOPS · STATUS: RESOLVED
+              SYS // ACTIVE GRAPH: {graphNodes.length} NODES · {graphEdges.length} EDGES {result ? `· TARGET: ${result.wallet.substring(0,8)}...` : '· DEMO DATA'}
             </div>
           </div>
         </Panel>
