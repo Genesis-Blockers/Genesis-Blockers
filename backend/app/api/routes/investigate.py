@@ -4,7 +4,7 @@ from app.models.investigation import (
     InvestigationRequest,
     InvestigationResponse,
 )
-
+from app.services.orchestrator import orchestrator
 
 router = APIRouter(
     prefix="/investigate",
@@ -14,10 +14,4 @@ router = APIRouter(
 
 @router.post("", response_model=InvestigationResponse)
 def investigate(request: InvestigationRequest):
-    return InvestigationResponse(
-        investigation_id="INV-DEMO-001",
-        wallet=request.wallet,
-        chain=request.chain,
-        status="pending",
-        message="Investigation pipeline not connected yet.",
-    )
+    return orchestrator.run_investigation(request)
