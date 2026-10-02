@@ -202,11 +202,11 @@ export default function TransactionGraph({ result }) {
         if (!addedEdges.has(tx.tx_hash)) {
           newEdges.push({
             id: tx.tx_hash,
-            source: tx.from_address,
-            target: tx.to_address,
+            source: tx.from || tx.from_address,
+            target: tx.to || tx.to_address,
             type: 'transferEdge',
             animated: true,
-            data: { amount: `${tx.value} ${tx.asset}` }
+            data: { amount: `${tx.amount} ${tx.asset}` }
           });
           addedEdges.add(tx.tx_hash);
         }
