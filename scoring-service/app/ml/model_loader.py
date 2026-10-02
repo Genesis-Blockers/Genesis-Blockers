@@ -39,3 +39,21 @@ class ModelLoader:
         probabilities = self.model.predict_proba(X)
 
         return probabilities[:, 1].tolist()
+
+    def feature_importance(self) -> dict[str, float]:
+        if self.model is None:
+            raise RuntimeError(
+                "Model has not been loaded"
+            )
+
+        if not hasattr(self.model, "feature_importances_"):
+            raise RuntimeError(
+                "Loaded model does not expose feature importances"
+            )
+
+        return dict(
+            zip(
+                FEATURE_COLUMNS,
+                self.model.feature_importances_,
+            )
+        )

@@ -12,8 +12,8 @@
       {
         "address": "0x00101aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "graph_distance": 1,
-        "transaction_count": 12,
-        "address_confidence": 0.5,
+        "transaction_count": 13,
+        "address_confidence": 0.47,
         "path_strength": 0.5,
         "path": [],
         "transactions": [],
@@ -26,8 +26,8 @@
       {
         "address": "0x00102aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "graph_distance": 1,
-        "transaction_count": 5,
-        "address_confidence": 0.95,
+        "transaction_count": 6,
+        "address_confidence": 0.98,
         "path_strength": 0.5,
         "path": [],
         "transactions": [],

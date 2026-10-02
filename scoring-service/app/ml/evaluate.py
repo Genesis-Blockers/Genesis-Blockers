@@ -1,4 +1,5 @@
 from typing import Dict
+from sklearn.model_selection import GroupKFold
 
 import pandas as pd
 from sklearn.metrics import (
@@ -143,7 +144,7 @@ class ModelEvaluator:
         test_dataset: pd.DataFrame,
     ) -> pd.DataFrame:
 
-        model = AttributionModel()
+        model = AttributionModel("random_forest")
         model.train(train_dataset)
 
         result = test_dataset[
@@ -224,3 +225,156 @@ class ModelEvaluator:
             predictions,
             hybrid_scores,
         )
+
+    def cross_validate_random_forest(
+        self,
+        dataset: pd.DataFrame,
+        n_splits: int = 5,
+    ) -> Dict[str, float]:
+        """
+        Evaluate Random Forest using stratified k-fold cross-validation.
+        Each fold trains a fresh model and evaluates it on unseen data.
+        """
+
+        X = dataset.drop(columns=["label"])
+        y = dataset["label"].astype(int)
+        groups = dataset["case_id"]
+
+        splitter = GroupKFold(
+            n_splits=n_splits,
+        )
+
+        accuracy_scores = []
+        precision_scores = []
+        recall_scores = []
+        f1_scores = []
+        roc_auc_scores = []
+        pr_auc_scores = []
+
+        for train_indices, test_indices in splitter.split(X, y, groups=groups):
+
+            train_dataset = dataset.iloc[train_indices].copy()
+            test_dataset = dataset.iloc[test_indices].copy()
+
+            model = AttributionModel("random_forest")
+            model.train(train_dataset)
+
+            probabilities = model.predict_proba(test_dataset)
+
+            predictions = [
+                1 if probability >= 0.5 else 0
+                for probability in probabilities
+            ]
+
+            y_true = test_dataset["label"].astype(int)
+
+            accuracy_scores.append(
+                accuracy_score(y_true, predictions)
+            )
+
+            precision_scores.append(
+                precision_score(
+                    y_true,
+                    predictions,
+                    zero_division=0,
+                )
+            )
+
+            recall_scores.append(
+                recall_score(
+                    y_true,
+                    predictions,
+                    zero_division=0,
+                )
+            )
+
+            f1_scores.append(
+                f1_score(
+                    y_true,
+                    predictions,
+                    zero_division=0,
+                )
+            )
+
+            if len(set(y_true)) == 2:
+                roc_auc_scores.append(
+                    roc_auc_score(
+                        y_true,
+                        probabilities,
+                    )
+                )
+
+                pr_auc_scores.append(
+                    average_precision_score(
+                        y_true,
+                        probabilities,
+                    )
+                )
+
+        return {
+            "accuracy_mean": round(
+                sum(accuracy_scores) / len(accuracy_scores),
+                4,
+            ),
+            "accuracy_std": round(
+                pd.Series(accuracy_scores).std(),
+                4,
+            ),
+            "precision_mean": round(
+                sum(precision_scores) / len(precision_scores),
+                4,
+            ),
+            "recall_mean": round(
+                sum(recall_scores) / len(recall_scores),
+                4,
+            ),
+            "f1_mean": round(
+                sum(f1_scores) / len(f1_scores),
+                4,
+            ),
+            "roc_auc_mean": round(
+                sum(roc_auc_scores) / len(roc_auc_scores),
+                4,
+            ),
+            "pr_auc_mean": round(
+                sum(pr_auc_scores) / len(pr_auc_scores),
+                4,
+            ),
+        }
+
+if __name__ == "__main__":
+    from app.features.dataset import DatasetLoader
+
+    dataset = DatasetLoader().load()
+
+    evaluator = ModelEvaluator()
+
+    print("=== MODEL EVALUATION ===")
+
+    # Existing evaluation
+    from app.ml.split import DatasetSplitter
+
+    splitter = DatasetSplitter()
+    train_dataset, test_dataset = splitter.split(dataset)
+
+    results = evaluator.evaluate(
+        train_dataset,
+        test_dataset,
+    )
+
+    for model_name, metrics in results.items():
+        print(f"\n{model_name}")
+
+        for metric_name, value in metrics.items():
+            print(f"  {metric_name}: {value}")
+
+    # Cross-validation
+    print("\n=== RANDOM FOREST 5-FOLD CROSS-VALIDATION ===")
+
+    cv_results = evaluator.cross_validate_random_forest(
+        dataset,
+        n_splits=5,
+    )
+
+    for metric_name, value in cv_results.items():
+        print(f"  {metric_name}: {value}")

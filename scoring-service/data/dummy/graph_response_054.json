@@ -11,10 +11,10 @@
     "vasp_matches": [
       {
         "address": "0x05401aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "graph_distance": 5,
-        "transaction_count": 6,
-        "address_confidence": 0.35,
-        "path_strength": 0.1667,
+        "graph_distance": 3,
+        "transaction_count": 2,
+        "address_confidence": 0.85,
+        "path_strength": 0.25,
         "path": [],
         "transactions": [],
         "vasp": {
@@ -25,14 +25,14 @@
       },
       {
         "address": "0x05402aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "graph_distance": 1,
-        "transaction_count": 1,
-        "address_confidence": 0.4,
-        "path_strength": 0.5,
+        "graph_distance": 5,
+        "transaction_count": 5,
+        "address_confidence": 0.31,
+        "path_strength": 0.1667,
         "path": [],
         "transactions": [],
         "vasp": {
-          "known": true,
+          "known": false,
           "vasp_id": "vasp_002",
           "vasp_name": "Synthetic VASP 002"
         }

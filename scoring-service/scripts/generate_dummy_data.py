@@ -14,6 +14,7 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.50,
         "transaction_count": 1,
         "address_confidence": 0.98,
+        "known_address_match": True,
         "label": 1,
     },
 
@@ -23,6 +24,7 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.50,
         "transaction_count": 5,
         "address_confidence": 0.95,
+        "known_address_match": True,
         "label": 1,
     },
 
@@ -32,6 +34,7 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.20,
         "transaction_count": 8,
         "address_confidence": 0.92,
+        "known_address_match": True,
         "label": 1,
     },
 
@@ -41,15 +44,17 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.3333,
         "transaction_count": 4,
         "address_confidence": 0.88,
+        "known_address_match": True,
         "label": 1,
     },
 
-    # Direct but weak VASP evidence
+    # Direct but weak evidence
     {
         "graph_distance": 1,
         "path_strength": 0.50,
         "transaction_count": 1,
         "address_confidence": 0.40,
+        "known_address_match": False,
         "label": 0,
     },
 
@@ -59,6 +64,7 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.25,
         "transaction_count": 10,
         "address_confidence": 0.45,
+        "known_address_match": False,
         "label": 0,
     },
 
@@ -68,24 +74,27 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.1667,
         "transaction_count": 6,
         "address_confidence": 0.35,
+        "known_address_match": False,
         "label": 0,
     },
 
-    # Close competition: moderately strong candidate
+    # Close competition
     {
         "graph_distance": 2,
         "path_strength": 0.3333,
         "transaction_count": 3,
         "address_confidence": 0.82,
+        "known_address_match": True,
         "label": 1,
     },
 
-    # Close competition: nearly identical but weaker candidate
+    # Close competition, weaker
     {
         "graph_distance": 2,
         "path_strength": 0.3333,
         "transaction_count": 3,
         "address_confidence": 0.75,
+        "known_address_match": True,
         "label": 0,
     },
 
@@ -95,6 +104,7 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.1667,
         "transaction_count": 12,
         "address_confidence": 0.90,
+        "known_address_match": False,
         "label": 1,
     },
 
@@ -104,19 +114,110 @@ FEATURE_SCENARIOS = [
         "path_strength": 0.50,
         "transaction_count": 12,
         "address_confidence": 0.50,
+        "known_address_match": True,
         "label": 0,
     },
 
-    # Ambiguous / no convincing candidate
+    # Ambiguous
     {
         "graph_distance": 4,
         "path_strength": 0.20,
         "transaction_count": 2,
         "address_confidence": 0.40,
+        "known_address_match": False,
+        "label": 0,
+    },
+
+    # High confidence but unknown address
+    {
+        "graph_distance": 2,
+        "path_strength": 0.3333,
+        "transaction_count": 4,
+        "address_confidence": 0.90,
+        "known_address_match": False,
+        "label": 1,
+    },
+
+    # Known address but weaker attribution
+    {
+        "graph_distance": 3,
+        "path_strength": 0.25,
+        "transaction_count": 2,
+        "address_confidence": 0.70,
+        "known_address_match": True,
         "label": 0,
     },
 ]
 
+def vary_scenario(scenario):
+    """
+    Add controlled variation to a base synthetic scenario.
+
+    The label remains attached to the underlying scenario,
+    while numerical features receive realistic perturbations.
+    """
+
+    varied = scenario.copy()
+
+    # Graph distance remains an integer hop count.
+    distance_variation = random.choice([-1, 0, 0, 0, 1])
+
+    varied["graph_distance"] = max(
+        1,
+        min(
+            5,
+            scenario["graph_distance"] + distance_variation,
+        ),
+    )
+
+    # Transaction count gets realistic variation.
+    transaction_variation = random.choice(
+        [-2, -1, 0, 0, 0, 1, 2]
+    )
+
+    varied["transaction_count"] = max(
+        1,
+        min(
+            15,
+            scenario["transaction_count"]
+            + transaction_variation,
+        ),
+    )
+
+    # Address confidence varies slightly.
+    confidence_variation = random.uniform(
+        -0.06,
+        0.06,
+    )
+
+    varied["address_confidence"] = round(
+        max(
+            0.20,
+            min(
+                0.99,
+                scenario["address_confidence"]
+                + confidence_variation,
+            ),
+        ),
+        2,
+    )
+
+    # Path strength is related to distance.
+    distance = varied["graph_distance"]
+
+    varied["path_strength"] = round(
+        1.0 / (distance + 1),
+        4,
+    )
+
+    # Occasionally flip the known-address signal.
+    # This creates harder classification cases.
+    if random.random() < 0.08:
+        varied["known_address_match"] = (
+            not scenario["known_address_match"]
+        )
+
+    return varied
 
 def make_candidate(case_id, candidate_number, scenario):
     vasp_id = f"vasp_{candidate_number:03d}"
@@ -137,7 +238,7 @@ def make_candidate(case_id, candidate_number, scenario):
         "path": [],
         "transactions": [],
         "vasp": {
-            "known": True,
+            "known": scenario["known_address_match"],
             "vasp_id": vasp_id,
             "vasp_name": f"Synthetic VASP {candidate_number:03d}",
         },
@@ -193,12 +294,14 @@ def main():
         scenario_1 = random.choice(FEATURE_SCENARIOS)
         scenario_2 = random.choice(FEATURE_SCENARIOS)
 
-        # Avoid cases where both candidates are exactly the same.
         while scenario_1 == scenario_2:
             scenario_2 = random.choice(FEATURE_SCENARIOS)
 
         scenario_pairs.append(
-            [scenario_1, scenario_2]
+            [
+                vary_scenario(scenario_1),
+                vary_scenario(scenario_2),
+            ]
         )
 
     for case_number, scenario_pair in enumerate(

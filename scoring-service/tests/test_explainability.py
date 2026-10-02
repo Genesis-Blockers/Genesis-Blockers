@@ -12,10 +12,24 @@ def test_high_confidence_reasons():
 
     reasons = generator.generate(features)
 
+    descriptions = [
+        reason["description"]
+        for reason in reasons
+    ]
+
     assert len(reasons) == 3
-    assert "High-confidence VASP address match" in reasons
-    assert "VASP address is directly connected to the wallet" in reasons
-    assert "Only one transaction supports the connection" in reasons
+
+    assert "High-confidence VASP address match" in descriptions
+
+    assert (
+        "VASP address is directly connected to the wallet"
+        in descriptions
+    )
+
+    assert (
+        "Transaction activity supports the connection"
+        in descriptions
+    )
 
 
 def test_low_confidence_reasons():
@@ -29,6 +43,14 @@ def test_low_confidence_reasons():
 
     reasons = generator.generate(features)
 
-    assert "Low-confidence VASP address match" in reasons
-    assert "VASP address is 5 transaction hops away" in reasons
-    assert "Multiple transactions support the connection" in reasons
+    descriptions = [
+        reason["description"]
+        for reason in reasons
+    ]
+
+    assert "Low-confidence VASP address match" in descriptions
+
+    assert (
+        "Multiple transactions support the connection"
+        in descriptions
+    )

@@ -12,8 +12,8 @@
       {
         "address": "0x03301aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "graph_distance": 1,
-        "transaction_count": 5,
-        "address_confidence": 0.95,
+        "transaction_count": 1,
+        "address_confidence": 0.81,
         "path_strength": 0.5,
         "path": [],
         "transactions": [],
@@ -25,14 +25,14 @@
       },
       {
         "address": "0x03302aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "graph_distance": 1,
-        "transaction_count": 1,
-        "address_confidence": 0.98,
-        "path_strength": 0.5,
+        "graph_distance": 2,
+        "transaction_count": 8,
+        "address_confidence": 0.45,
+        "path_strength": 0.3333,
         "path": [],
         "transactions": [],
         "vasp": {
-          "known": true,
+          "known": false,
           "vasp_id": "vasp_002",
           "vasp_name": "Synthetic VASP 002"
         }
