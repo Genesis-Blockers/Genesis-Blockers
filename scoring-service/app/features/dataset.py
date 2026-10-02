@@ -79,9 +79,19 @@ class DatasetLoader:
             "path_strength",
             "transaction_count",
             "address_confidence",
+            "known_address_match",
+            "distance_score",
+            "transaction_score",
+            "address_match_score",
         ]
 
         X = dataset[feature_columns].copy()
+
+        X["known_address_match"] = (
+            X["known_address_match"]
+            .astype(int)
+        )
+
         y = dataset["label"].astype(int).copy()
 
         return X, y

@@ -27,7 +27,17 @@ model_loader = ModelLoader().load()
 )
 def calculate_score(request: ScoringRequest):
 
+    # features = request.features.model_dump()
     features = request.features.model_dump()
+
+    features["distance_score"] = 1 / max(features["graph_distance"], 1)
+    features["transaction_score"] = min(
+        features["transaction_count"] / 10,
+        1.0,
+    )
+    features["address_match_score"] = (
+        1.0 if features["known_address_match"] else 0.0
+    )
 
     # Rule-based baseline
     baseline_confidence = baseline_scorer.score(

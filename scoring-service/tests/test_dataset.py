@@ -33,6 +33,10 @@ def test_prepare_ml_data():
         "path_strength",
         "transaction_count",
         "address_confidence",
+        "known_address_match",
+        "distance_score",
+        "transaction_score",
+        "address_match_score",
     ]
 
     assert X.dtypes.notna().all()
