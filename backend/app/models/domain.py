@@ -1,13 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 
 class Transaction(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     tx_hash: str
-    from_address: str
-    to_address: str
-    value: float
-    timestamp: int
+    block_number: int
+    timestamp: str
+    from_address: str = Field(alias="from")
+    to_address: str = Field(alias="to")
     asset: str = "ETH"
+    amount: float
+    status: str
 
 class VaspEntity(BaseModel):
     name: str
